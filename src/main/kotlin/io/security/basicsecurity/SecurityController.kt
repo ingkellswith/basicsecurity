@@ -10,4 +10,14 @@ class SecurityController {
     fun index(): String{
         return "home"
     }
+
+    @GetMapping("/login-page")
+    fun loginPage(): String{
+        return "loginPage"
+    }
+
+    @GetMapping("/test")
+    fun test(): String{
+        return "testing"
+    }
 }
