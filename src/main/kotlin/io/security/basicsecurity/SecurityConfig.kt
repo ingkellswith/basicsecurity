@@ -13,7 +13,7 @@ class SecurityConfig: WebSecurityConfigurerAdapter() {
     // 아래는 모든 페이지에 접근 권한이 필요하므로 어떤 페이지로 가든 /login-page로 간다.
     // defaultSuccessUrl는 default로 successHandler에서 설정 가능
     // failureUrl는 default로 failureHandler에서 설정 가능
-    // usernameParameter, passwordParameter는 form의 name으로 스프링 시큐리티에서는 이 네임을 기준으로 폼로그인을 진행한다.
+    // usernameParameter, passwordParameter는 input의 "name"으로 스프링 시큐리티에서는 이 네임을 기준으로 폼로그인을 진행한다.
     // 예로, html element console에서 user input의 name을 userId가 아닌 다른 name으로 바꾸면 키 값이 달라 인증이 실패한다.
     // loginProcessingUrl >> form의 action으로 react의 onSubmit과 같다.
     override fun configure(http: HttpSecurity) {
@@ -25,7 +25,7 @@ class SecurityConfig: WebSecurityConfigurerAdapter() {
             .authenticated()
         http
             .formLogin()
-            .loginPage("/login-page")
+            //.loginPage("/login")
             .defaultSuccessUrl("/")
             .failureUrl("/login")
             .usernameParameter("userId")
@@ -35,5 +35,16 @@ class SecurityConfig: WebSecurityConfigurerAdapter() {
             .failureHandler(AuthenticationHandler.CustomAuthenticationFailureHandler())
             // 로그인 페이지는 허용되어야하므로 permitAll()
             .permitAll()
+        http
+            .logout()
+            // 이 url로 진입 시 로그아웃 가능
+            .logoutUrl("/logout")
+            // logout 성공 시 redirect되는 url
+            .logoutSuccessUrl("/login")
+            // logout 진행할 시
+            .addLogoutHandler(LogOutHandler.CustomLogOutHandler())
+            // logout 성공 시
+            .logoutSuccessHandler(LogOutHandler.CustomLogOutSuccessHandler())
+            .deleteCookies("remember-me")
     }
 }
