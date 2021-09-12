@@ -1,14 +1,19 @@
 package io.security.basicsecurity
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.web.authentication.RememberMeServices
 
 @Configuration
 @EnableWebSecurity
 class SecurityConfig: WebSecurityConfigurerAdapter() {
 
+    @Autowired
+    private lateinit var userDetailsService: UserDetailsService
     // loginPage는 접근 권한이 필요한 페이지로 갈 때 로그인이 되어 있지 않으면 redirect되는 페이지
     // 아래는 모든 페이지에 접근 권한이 필요하므로 어떤 페이지로 가든 /login-page로 간다.
     // defaultSuccessUrl는 default로 successHandler에서 설정 가능
@@ -30,7 +35,7 @@ class SecurityConfig: WebSecurityConfigurerAdapter() {
             .failureUrl("/login")
             .usernameParameter("userId")
             .passwordParameter("passwd")
-            .loginProcessingUrl("/login_proc")
+            //.loginProcessingUrl("/login_proc")
             .successHandler(AuthenticationHandler.CustomAuthenticationSuccessHandler())
             .failureHandler(AuthenticationHandler.CustomAuthenticationFailureHandler())
             // 로그인 페이지는 허용되어야하므로 permitAll()
@@ -46,5 +51,11 @@ class SecurityConfig: WebSecurityConfigurerAdapter() {
             // logout 성공 시
             .logoutSuccessHandler(LogOutHandler.CustomLogOutSuccessHandler())
             .deleteCookies("remember-me")
+        http
+            .rememberMe()
+            .rememberMeParameter("remember")
+            // 3600초 = 1시간, 기본 14일
+            .tokenValiditySeconds(3600)
+            .userDetailsService(userDetailsService)
     }
 }
