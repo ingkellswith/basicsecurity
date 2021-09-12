@@ -57,5 +57,16 @@ class SecurityConfig: WebSecurityConfigurerAdapter() {
             // 3600초 = 1시간, 기본 14일
             .tokenValiditySeconds(3600)
             .userDetailsService(userDetailsService)
+        http
+            .sessionManagement()
+            .maximumSessions(1)
+            // maxSessionsPreventsLogin의 param이 true이면 새로 로그인하는 사용자가 로그인할 수 없음
+            // false이면 이전 세션을 종료 처리
+            .maxSessionsPreventsLogin(false)
+        http
+            .sessionManagement()
+            .sessionFixation()
+            // changeSessionId()는 기본값으로 설정이 필요 없음
+            .changeSessionId()
     }
 }
