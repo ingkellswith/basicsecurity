@@ -11,13 +11,23 @@ class SecurityController {
         return "home"
     }
 
-    @GetMapping("/login-page")
-    fun loginPage(): String{
-        return "loginPage"
+    @GetMapping("/user")
+    fun user(): String{
+        return "user"
     }
 
-    @GetMapping("/test")
-    fun test(): String{
-        return "testing"
+    @GetMapping("/admin/pay")
+    fun adminPay(): String{
+        return "admin-pay"
+    }
+
+    @GetMapping("/admin/**")
+    fun admin(): String{
+        return "admin**"
+    }
+
+    @GetMapping("/where")
+    fun where(): String{
+        return "where"
     }
 }

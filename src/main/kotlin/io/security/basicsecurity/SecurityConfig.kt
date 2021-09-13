@@ -2,6 +2,7 @@ package io.security.basicsecurity
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
@@ -14,6 +15,15 @@ class SecurityConfig: WebSecurityConfigurerAdapter() {
 
     @Autowired
     private lateinit var userDetailsService: UserDetailsService
+
+    override fun configure(auth: AuthenticationManagerBuilder?) {
+        auth?.inMemoryAuthentication()?.withUser("user")?.password("{noop}1111")?.roles("USER")
+        auth?.inMemoryAuthentication()?.withUser("sys")?.password("{noop}1111")?.roles("SYS")
+        auth?.inMemoryAuthentication()?.withUser("admin")?.password("{noop}1111")?.roles("ADMIN")
+        // auth?.inMemoryAuthentication()?.withUser("admin")?.password("{noop}1111")?.roles("ADMIN","SYS","USER")
+        // 이렇게 입력하면 admin으로 로그인했을 경우 ADMIN, SYS, USER의 권한을 모두 갖게 됨
+    }
+
     // loginPage는 접근 권한이 필요한 페이지로 갈 때 로그인이 되어 있지 않으면 redirect되는 페이지
     // 아래는 모든 페이지에 접근 권한이 필요하므로 어떤 페이지로 가든 /login-page로 간다.
     // defaultSuccessUrl는 default로 successHandler에서 설정 가능
@@ -22,12 +32,18 @@ class SecurityConfig: WebSecurityConfigurerAdapter() {
     // 예로, html element console에서 user input의 name을 userId가 아닌 다른 name으로 바꾸면 키 값이 달라 인증이 실패한다.
     // loginProcessingUrl >> form의 action으로 react의 onSubmit과 같다.
     override fun configure(http: HttpSecurity) {
-        http.authorizeRequests()
-            .antMatchers("/test")
-            .permitAll()
-            // .antMatchers("/test").permitAll()로 인해 /test는 로그인되지않아도 접근가능
-            .anyRequest()
-            .authenticated()
+//        http.authorizeRequests()
+//            .antMatchers("/test")
+//            .permitAll()
+//            // .antMatchers("/test").permitAll()로 인해 /test는 로그인되지않아도 접근가능
+//            .anyRequest()
+//            .authenticated()
+        http
+            .authorizeRequests()
+            .antMatchers("/user").hasRole("USER")
+            .antMatchers("/admin/pay").hasRole("ADMIN")
+            .antMatchers("/admin/**").access("hasRole('USER') or hasRole('SYS')")
+            .anyRequest().authenticated()
         http
             .formLogin()
             //.loginPage("/login")
@@ -66,7 +82,8 @@ class SecurityConfig: WebSecurityConfigurerAdapter() {
         http
             .sessionManagement()
             .sessionFixation()
-            // changeSessionId()는 기본값으로 설정이 필요 없음
+            // changeSessionId()는 기본값으로 설정이 필요 없음, 세션 id를 로그인할 때마다 새롭게 발급해주는 역할
             .changeSessionId()
+            //.changeSessionId() 대신 .newSession()을 하면 새로운 세션id가 발급되는 것은 같으나, 이전 세션이 사용이 불가능하다.
     }
 }
